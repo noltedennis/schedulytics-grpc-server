@@ -1,0 +1,14 @@
+steps:
+  - name: gcr.io/cloud_builders/docker
+    id: Build
+    args:
+      - build
+      - -t
+      - gcr.io/$PROJECT_ID/schedulytics-grpc-server:$COMMIT_SHA
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push
+    args:
+      - push
+      - gcr.io/$PROJECT_ID/schedulytics-grpc-server:$COMMIT_SHA
