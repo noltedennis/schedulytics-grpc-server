@@ -63,6 +63,7 @@ steps:
         if [ -n "$(git status --porcelain)" ]; then
           git add -A
           git commit -m 'CI: ${COMMIT_SHA} Author: $(git log --format="%an <%ae>" -n 1 HEAD)'
+          git pull
           git push
         fi
     volumes:
