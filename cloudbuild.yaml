@@ -35,11 +35,7 @@ steps:
       - '-c'
       - |
         chmod 600 /root/.ssh/id_github
-        cat <<EOF >/root/.ssh/config
-        Hostname github.com
-        IdentityFile /root/.ssh/id_github
-        EOF
-        mv build/known_hosts.github /root/.ssh/known_hosts
+        ssh-keyscan github.com > /root/.ssh/known_hosts
     volumes:
       - name: 'ssh'
         path: /root/.ssh
