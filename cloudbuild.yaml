@@ -28,7 +28,6 @@ steps:
       - |
         chmod 600 /root/.ssh/id_rsa
         ssh-keyscan github.com > /root/.ssh/known_hosts
-        git config --global user.email "dennis_nolte@gmx.com"
     volumes:
       - name: 'ssh'
         path: /root/.ssh
@@ -54,21 +53,18 @@ steps:
       - $COMMIT_SHA
 
   - name: 'gcr.io/cloud-builders/git'
-    id: Commit build changes
+    id: Commit and push build changes
     dir: $_CD_REPO
+    entrypoint: 'bash'
     args:
-      - commit
-      - -am
-      - 'CI: ${COMMIT_SHA} Author: $(git log --format="%an <%ae>" -n 1 HEAD)'
+      - '-c'
+      - |
+        git config --global user.email "dennis_nolte@gmx.com"
+        if [ -n "$(git status --porcelain)" ]; then
+          git add -A
+          git commit -m 'CI: ${COMMIT_SHA} Author: $(git log --format="%an <%ae>" -n 1 HEAD)'
+          git push
+        fi
     volumes:
     - name: 'ssh'
       path: /root/.ssh
-    
-  - name: 'gcr.io/cloud-builders/git'
-    id: Push changes to repository
-    dir: $_CD_REPO
-    args:
-      - push
-    volumes:
-      - name: 'ssh'
-        path: /root/.ssh
