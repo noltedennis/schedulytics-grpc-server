@@ -1,2 +1,2 @@
-# schedulytics-backend
-The Go backend of schedulytics.
+# schedulytics-grpc-server
+The GRPC server that connects the Schedulytics Backend to the Frontend.

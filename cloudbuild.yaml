@@ -1,6 +1,10 @@
+substitutions:
+  _CD_REPO: schedulytics-environment
+
 steps:
+  # Build the image and push it to GCR
   - name: gcr.io/cloud_builders/docker
-    id: Build
+    id: Build the GRPC Server
     args:
       - build
       - -t
@@ -8,7 +12,71 @@ steps:
       - .
 
   - name: gcr.io/cloud-builders/docker
-    id: Push
+    id: Push image to Container Registry
     args:
       - push
       - gcr.io/$PROJECT_ID/schedulytics-grpc-server:$COMMIT_SHA
+ 
+  # Make changes to the schedulytics-environment GitHub project
+  - name: gcr.io/cloud-builders/gcloud
+    id: Acquire SSH key for GitHub from SecretManager
+    entrypoint: 'bash'
+    args: 
+      - '-c'
+      - 'gcloud secrets versions access latest --secret=schedulytics-environment-ssh > /root/.ssh/id_github'
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+  
+  - name: 'gcr.io/cloud-builders/git'
+    id: Setup git with key and domain
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        chmod 600 /root/.ssh/id_github
+        cat <<EOF >/root/.ssh/config
+        Hostname github.com
+        IdentityFile /root/.ssh/id_github
+        EOF
+        mv build/known_hosts.github /root/.ssh/known_hosts
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+  
+  - name: 'gcr.io/cloud-builders/git'
+    id: Clone the repository
+    args:
+      - clone
+      - git@github.com:noltedennis/schedulytics-environment
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
+
+  - name: gcr.io/$PROJECT_ID/yq
+    id: Update chart
+    args:
+      - yq
+      - write
+      - '-i'
+      - /workspace/$_CD_REPO/schedulytics-grpc-server/values.yaml
+      - image.tag
+      - $COMMIT_SHA
+
+  - name: 'gcr.io/cloud-builders/git'
+    id: Commit build changes
+    args:
+      - commit
+      - -m
+      - "CI: ${COMMIT_SHA} Author: $(git log --format='%an <%ae>' -n 1 HEAD)"
+    volumes:
+    - name: 'ssh'
+      path: /root/.ssh
+    
+  - name: 'gcr.io/cloud-builders/git'
+    id: Push changes to repository
+    args:
+      - push
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
