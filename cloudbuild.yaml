@@ -66,7 +66,7 @@ steps:
     dir: $_CD_REPO
     args:
       - commit
-      - -m
+      - -am
       - "CI: ${COMMIT_SHA} Author: $(git log --format='%an <%ae>' -n 1 HEAD)"
     volumes:
     - name: 'ssh'
