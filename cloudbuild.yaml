@@ -51,6 +51,8 @@ steps:
       - '-c'
       - |
         ls -l ./
+        cat /root/.ssh/config
+        cat /root/.ssh/id_github
         cat /root/.ssh/known_hosts
     volumes:
       - name: 'ssh'
