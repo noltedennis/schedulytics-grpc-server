@@ -39,20 +39,6 @@ steps:
     volumes:
       - name: 'ssh'
         path: /root/.ssh
-
-  - name: 'gcr.io/cloud-builders/git'
-    id: debug1
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        ls -l ./
-        cat /root/.ssh/config
-        cat /root/.ssh/id_github
-        cat /root/.ssh/known_hosts
-    volumes:
-      - name: 'ssh'
-        path: /root/.ssh
   
   - name: 'gcr.io/cloud-builders/git'
     id: Clone the repository
@@ -65,16 +51,18 @@ steps:
 
   - name: gcr.io/$PROJECT_ID/yq
     id: Update chart
+    dir: $_CD_REPO
     args:
       - yq
       - write
       - '-i'
-      - /workspace/$_CD_REPO/schedulytics-grpc-server/values.yaml
+      - schedulytics-grpc-server/values.yaml
       - image.tag
       - $COMMIT_SHA
 
   - name: 'gcr.io/cloud-builders/git'
     id: Commit build changes
+    dir: $_CD_REPO
     args:
       - commit
       - -m
@@ -85,6 +73,7 @@ steps:
     
   - name: 'gcr.io/cloud-builders/git'
     id: Push changes to repository
+    dir: $_CD_REPO
     args:
       - push
     volumes:
