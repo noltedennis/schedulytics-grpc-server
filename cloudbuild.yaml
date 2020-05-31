@@ -67,7 +67,7 @@ steps:
     args:
       - commit
       - -am
-      - "CI: ${COMMIT_SHA} Author: $(git log --format='%an <%ae>' -n 1 HEAD)"
+      - 'CI: ${COMMIT_SHA} Author: $(git log --format="%an <%ae>" -n 1 HEAD)'
     volumes:
     - name: 'ssh'
       path: /root/.ssh
