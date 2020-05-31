@@ -43,6 +43,18 @@ steps:
     volumes:
       - name: 'ssh'
         path: /root/.ssh
+
+  - name: 'gcr.io/cloud-builders/git'
+    id: debug1
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        ls -l ./
+        cat /root/.ssh/known_hosts
+    volumes:
+      - name: 'ssh'
+        path: /root/.ssh
   
   - name: 'gcr.io/cloud-builders/git'
     id: Clone the repository
