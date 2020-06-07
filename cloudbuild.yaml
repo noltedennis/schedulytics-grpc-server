@@ -43,7 +43,7 @@ steps:
 
   - name: gcr.io/$PROJECT_ID/yq
     id: Update chart
-    dir: $_CD_REPO
+    dir: $_CD_REPO/charts
     args:
       - yq
       - write
